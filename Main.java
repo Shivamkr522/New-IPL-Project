@@ -2,9 +2,7 @@ package com.iplproject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 
 
 public class Main {
@@ -51,15 +49,54 @@ public class Main {
 
         List<Match> matches = readMatchesData();
         List<Delivery> deliveries = readDeliveriesData();
+        calculateMatchesPlayed(matches);
+        System.out.println();
+        matchesWonByTeamOverYears(matches);
+        System.out.println();
+        extraRunsPerTeamIn2016(matches,deliveries);
 
 
+    }
 
+    private static void extraRunsPerTeamIn2016(List<Match> matches, List<Delivery> deliveries) {
+    }
+
+    private static void matchesWonByTeamOverYears(List<Match> matches) {
+        HashMap<String,Integer> teamWonOverYears = new HashMap<>();
+        for(Match match : matches){
+            if(teamWonOverYears.containsKey(match.getSeason()+" "+ match.getWinner())){
+                int value = teamWonOverYears.get(match.getSeason()+" "+ match.getWinner());
+                teamWonOverYears.put(match.getSeason()+" "+ match.getWinner(),value+1);
+            }
+            else{
+                teamWonOverYears.put(match.getSeason()+" "+ match.getWinner(),1);
+            }
+        }
+        for(Map.Entry m : teamWonOverYears.entrySet()){
+            System.out.println(m.getKey()+" "+m.getValue());
+        }
+    }
+
+    private static void calculateMatchesPlayed(List<Match> matches) {
+
+        HashMap<String,Integer> mapStoringPlayedMatch = new HashMap<>();
+        for(Match match : matches){
+            if(mapStoringPlayedMatch.containsKey(match.getSeason())){
+                int value = mapStoringPlayedMatch.get(match.getSeason());
+                mapStoringPlayedMatch.put(match.getSeason(),value+1);
+            }
+            else{
+                mapStoringPlayedMatch.put(match.getSeason(),1);
+            }
+        }
+
+        System.out.println(mapStoringPlayedMatch);
     }
 
     private static List<Delivery> readDeliveriesData() {
         List<Delivery> deliveries = new ArrayList<>();
         try{
-            BufferedReader readDeliveries = new BufferedReader(new FileReader("/home/shivam/Project2/deliveries.csv"));
+            BufferedReader readDeliveries = new BufferedReader(new FileReader("/home/shivam/Project1/deliveries.csv"));
             String line;
             while((line = readDeliveries.readLine())!=null)
             {
@@ -83,10 +120,18 @@ public class Main {
                 delivery.setBatsmanRuns(lineDeliveries.get(SET_DELIVERY_BATSMAN_RUNS));
                 delivery.setExtraRuns(lineDeliveries.get(SET_DELIVERY_EXTRA_RUNS));
                 delivery.setTotalRuns(lineDeliveries.get(SET_DELIVERY_TOTAL_RUNS));
-                delivery.setPlayerDismissed(lineDeliveries.get(SET_DELIVERY_PLAYER_DISMISSED));
-                delivery.setDismissalKind(lineDeliveries.get(SET_DELIVERY_DISMISSAL_KIND));
-                delivery.setFielder(lineDeliveries.get(SET_DELIVERY_FIELDER));
-
+                if(lineDeliveries.size()>SET_DELIVERY_TOTAL_RUNS+1)
+                    delivery.setPlayerDismissed(lineDeliveries.get(SET_DELIVERY_PLAYER_DISMISSED));
+                else
+                    delivery.setPlayerDismissed("");
+                if(lineDeliveries.size()>SET_DELIVERY_PLAYER_DISMISSED+1)
+                    delivery.setDismissalKind(lineDeliveries.get(SET_DELIVERY_DISMISSAL_KIND));
+                else
+                    delivery.setDismissalKind("");
+                if(lineDeliveries.size()>SET_DELIVERY_DISMISSAL_KIND+1)
+                    delivery.setFielder(lineDeliveries.get(SET_DELIVERY_FIELDER));
+                else
+                    delivery.setFielder("");
                 deliveries.add(delivery);
             }
         }
@@ -119,10 +164,19 @@ public class Main {
                 match.setWinByWickets(lineMatches.get(SET_WIN_BY_WICKETS));
                 match.setPlayerOfMatch(lineMatches.get(SET_PLAYER_OF_MATCH));
                 match.setVenue(lineMatches.get(SET_VENUE));
-                if(lineMatches.get(SET_UMPIRE1)!=null)
-                    match.setUmpire1(lineMatches.get(SET_UMPIRE1));
-                if(lineMatches.get(SET_UMPIRE2)!=null)
+                if(lineMatches.size()>SET_VENUE+1){
+                        match.setUmpire1(lineMatches.get(SET_UMPIRE1));
+                }
+                else{
+                    match.setUmpire1("");
+                }
+                if(lineMatches.size()>SET_UMPIRE1+1){
                     match.setUmpire2(lineMatches.get(SET_UMPIRE2));
+                }
+                else {
+                    match.setUmpire2("");
+                }
+
                 matches.add(match);
 
             }

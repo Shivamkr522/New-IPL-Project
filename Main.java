@@ -2,6 +2,8 @@ package com.iplproject;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.*;
 
 
@@ -55,12 +57,73 @@ public class Main {
         System.out.println();
         extraRunsPerTeamIn2016(matches,deliveries);
         System.out.println();
-
+        topEconomicalBowler2015(matches,deliveries);
+        System.out.println();
+        matchesTiedInYearsInBetweenTeams(matches);
+        System.out.println();
 
 
     }
 
+    private static void matchesTiedInYearsInBetweenTeams(List<Match> matches) {
+        for(Match match : matches){
+            if(match.getResult().equals("tie")){
+                System.out.println(match.getSeason() + " "+ match.getTeam1() + " " + match.getTeam2() + " " + match.getResult());
+            }
+        }
+    }
 
+    private static void topEconomicalBowler2015(List<Match> matches, List<Delivery> deliveries) {
+        List<String> saveIdsFromDeliveries = new ArrayList<>();
+        for(Match match : matches){
+            if(match.getSeason().equals("2015")){
+                saveIdsFromDeliveries.add(match.getId());
+            }
+        }
+        HashMap<String,Integer> storeBallerCount = new HashMap<>();
+        HashMap<String,Integer> storeBallerRun = new HashMap<>();
+        for(Delivery delivery : deliveries){
+            if(saveIdsFromDeliveries.contains(delivery.getMatchId())){
+                if(storeBallerCount.containsKey(delivery.getBowler())){
+                    int value = storeBallerCount.get(delivery.getBowler());
+                    storeBallerCount.put(delivery.getBowler(),value+1);
+                }
+                else{
+                    storeBallerCount.put(delivery.getBowler(),1);
+                }
+                if(storeBallerRun.containsKey(delivery.getBowler())){
+                    int value = storeBallerRun.get(delivery.getBowler());
+                    storeBallerRun.put(delivery.getBowler(),value+Integer.parseInt(delivery.getTotalRuns()));
+                }
+                else{
+                    storeBallerRun.put(delivery.getBowler(),Integer.parseInt(delivery.getTotalRuns()));
+                }
+            }
+        }
+        HashMap<String,Double> economicalBowler = new HashMap<>();
+        HashMap<String,Double> reducedOverForBowler = new HashMap<>();
+        for(Map.Entry storeOver : storeBallerCount.entrySet()){
+            int findOver = (int)(storeOver.getValue());
+            int findRestBalls = findOver%6;
+            double findOvers = (double)findOver/6;
+            double precisionNumber = (double)findRestBalls/6;
+            findOvers+=precisionNumber;
+            double finalOver = BigDecimal.valueOf(findOvers).setScale(2, RoundingMode.HALF_UP).doubleValue();
+            reducedOverForBowler.put((String) storeOver.getKey(),finalOver);
+        }
+        for(Map.Entry finalStore : storeBallerRun.entrySet()){
+            double over = reducedOverForBowler.get(finalStore.getKey());
+            int runs = (int) finalStore.getValue();
+            double economy = runs/over;
+            economicalBowler.put((String) finalStore.getKey(),economy);
+        }
+        double maximum = Collections.min(economicalBowler.values());
+
+        for(Map.Entry mp : economicalBowler.entrySet()){
+            if(mp.getValue().equals(maximum))
+                System.out.println(mp.getKey()+ " "+ maximum);
+        }
+    }
 
     private static void extraRunsPerTeamIn2016(List<Match> matches, List<Delivery> deliveries) {
         List<String> saveIdsFromMatches = new ArrayList<>();

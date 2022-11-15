@@ -54,11 +54,37 @@ public class Main {
         matchesWonByTeamOverYears(matches);
         System.out.println();
         extraRunsPerTeamIn2016(matches,deliveries);
+        System.out.println();
+
 
 
     }
 
+
+
     private static void extraRunsPerTeamIn2016(List<Match> matches, List<Delivery> deliveries) {
+        List<String> saveIdsFromMatches = new ArrayList<>();
+        for(Match match : matches){
+            if(match.getSeason().equals("2016")){
+                saveIdsFromMatches.add(match.getId());
+            }
+        }
+        HashMap<String,Integer> extraRuns = new HashMap<>();
+        for(Delivery delivery : deliveries){
+            if(saveIdsFromMatches.contains(delivery.getMatchId())){
+                if(extraRuns.containsKey(delivery.getBattingTeam())){
+                    int value = extraRuns.get(delivery.getBattingTeam());
+                    extraRuns.put(delivery.getBattingTeam(),value+Integer.parseInt(delivery.getExtraRuns()));
+                }
+                else{
+                    extraRuns.put(delivery.getBattingTeam(),Integer.parseInt(delivery.getExtraRuns()));
+                }
+            }
+        }
+        for(Map.Entry m: extraRuns.entrySet()){
+            System.out.println(m.getKey()+" "+m.getValue());
+        }
+
     }
 
     private static void matchesWonByTeamOverYears(List<Match> matches) {
